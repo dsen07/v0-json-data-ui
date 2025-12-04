@@ -1,0 +1,71 @@
+<div class="json-tree-view">
+  <div class="filter-header">
+    <div class="filter-controls">
+      <div class="filter-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Filter by key..."
+          [value]="keyFilter"
+          (input)="onKeyFilterChange($any($event.target).value)"
+        />
+        <button *ngIf="keyFilter" class="clear-button" (click)="clearKeyFilter()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="filter-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Filter by value..."
+          [value]="valueFilter"
+          (input)="onValueFilterChange($any($event.target).value)"
+        />
+        <button *ngIf="valueFilter" class="clear-button" (click)="clearValueFilter()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <button *ngIf="hasActiveFilters" class="clear-all-button" (click)="clearAllFilters()">
+        Clear All
+      </button>
+    </div>
+
+    <div *ngIf="hasActiveFilters && matchCount !== null" class="match-count">
+      <ng-container *ngIf="matchCount === 0">No matches found</ng-container>
+      <ng-container *ngIf="matchCount > 0">
+        Found {{ matchCount }} {{ matchCount === 1 ? 'match' : 'matches' }}
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="tree-content">
+    <div class="tree-container">
+      <div *ngIf="showNoResults" class="no-results">
+        <svg class="no-results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <p>No matches found for your filters</p>
+        <p class="no-results-hint">Try adjusting your search criteria</p>
+      </div>
+
+      <app-tree-node *ngIf="!showNoResults && rootNode" [nodeData]="rootNode"></app-tree-node>
+    </div>
+  </div>
+</div>

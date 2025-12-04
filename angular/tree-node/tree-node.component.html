@@ -1,0 +1,61 @@
+<div class="tree-node" [class.has-border]="!isRoot">
+  <div 
+    class="node-row" 
+    [class.is-root]="isRoot"
+    [style.padding-left]="paddingLeft"
+  >
+    <!-- Expand/Collapse Button -->
+    <button 
+      *ngIf="isExpandable" 
+      class="expand-button" 
+      (click)="toggleExpand()"
+    >
+      <svg *ngIf="isExpanded" class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+      <svg *ngIf="!isExpanded" class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+    <div *ngIf="!isExpandable" class="spacer"></div>
+
+    <!-- Key and Value -->
+    <div class="content">
+      <span *ngIf="!isRoot" class="key" [innerHtml]="getKeyDisplay()">:</span>
+      
+      <div class="value-container">
+        <span 
+          *ngIf="isValueExpandable" 
+          class="value value-preview"
+        >
+          {{ displayValue }}
+        </span>
+        <span 
+          *ngIf="!isValueExpandable" 
+          class="value" 
+          [ngClass]="getValueColor(nodeData.value)"
+          [innerHtml]="displayValue"
+        ></span>
+      </div>
+    </div>
+
+    <!-- Copy Button -->
+    <button class="copy-button" (click)="handleCopy()">
+      <svg *ngIf="!copied" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      <svg *ngIf="copied" class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Children -->
+  <div *ngIf="isExpandable && isExpanded" class="children">
+    <app-tree-node 
+      *ngFor="let child of childNodes; trackBy: trackByIndex" 
+      [nodeData]="child"
+    ></app-tree-node>
+  </div>
+</div>

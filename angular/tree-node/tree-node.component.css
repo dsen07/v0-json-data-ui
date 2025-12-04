@@ -1,0 +1,146 @@
+.tree-node {
+  position: relative;
+}
+
+.tree-node.has-border {
+  border-left: 2px solid rgba(38, 38, 38, 0.5);
+}
+
+.node-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  transition: background-color 0.2s;
+}
+
+.node-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.node-row.is-root {
+  border-bottom: 1px solid var(--border, #262626);
+}
+
+.expand-button {
+  margin-top: 0.125rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--muted-foreground, #6b6b6b);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expand-button:hover {
+  color: var(--foreground, #ededed);
+}
+
+.chevron {
+  width: 1rem;
+  height: 1rem;
+}
+
+.spacer {
+  width: 1rem;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.key {
+  color: var(--json-key, #88c0d0);
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.key::after {
+  content: ":";
+}
+
+.value-container {
+  flex: 1;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.value {
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+}
+
+.value-preview {
+  color: var(--muted-foreground, #6b6b6b);
+}
+
+.value-string {
+  color: var(--json-string, #a3be8c);
+}
+
+.value-number {
+  color: var(--json-number, #b48ead);
+}
+
+.value-boolean {
+  color: var(--json-boolean, #d08770);
+}
+
+.value-null {
+  color: var(--json-null, #bf616a);
+}
+
+.copy-button {
+  opacity: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--muted-foreground, #6b6b6b);
+  transition: opacity 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.node-row:hover .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  color: var(--foreground, #ededed);
+}
+
+.copy-button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.check-icon {
+  color: var(--primary, #3b82f6);
+}
+
+.children {
+  position: relative;
+}
+
+::ng-deep .highlight {
+  background: rgba(59, 130, 246, 0.3);
+  color: var(--foreground, #ededed);
+  border-radius: 2px;
+  padding: 0 2px;
+}
