@@ -1,0 +1,228 @@
+// json-tree-view.component.ts
+import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { trigger, transition, style, animate } from '@angular/animations';
+
+interface TreeNodeData {
+  [key: string]: any;
+}
+
+@Component({
+  selector: 'app-json-tree-view',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './json-tree-view.component.html',
+  styleUrls: ['./json-tree-view.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('expandCollapse', [
+      transition(':enter', [
+        style({ height: 0, opacity: 0, overflow: 'hidden' }),
+        animate('200ms ease-out', style({ height: '*', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-in', style({ height: 0, opacity: 0, overflow: 'hidden' }))
+      ])
+    ])
+  ]
+})
+export class JsonTreeViewComponent implements OnInit {
+  @Input() data: any;
+  
+  keyFilter: string = '';
+  valueFilter: string = '';
+  filteredData: any;
+  matchCount: number | null = null;
+  
+  constructor(private cdr: ChangeDetectorRef) {}
+  
+  ngOnInit(): void {
+    this.filteredData = this.data;
+  }
+  
+  onKeyFilterChange(value: string): void {
+    this.keyFilter = value;
+    this.applyFilters();
+  }
+  
+  onValueFilterChange(value: string): void {
+    this.valueFilter = value;
+    this.applyFilters();
+  }
+  
+  clearFilters(): void {
+    this.keyFilter = '';
+    this.valueFilter = '';
+    this.filteredData = this.data;
+    this.matchCount = null;
+  }
+  
+  private applyFilters(): void {
+    if (!this.keyFilter && !this.valueFilter) {
+      this.filteredData = this.data;
+      this.matchCount = null;
+      return;
+    }
+    
+    this.filteredData = this.filterJson(
+      this.data,
+      this.keyFilter.toLowerCase(),
+      this.valueFilter.toLowerCase()
+    );
+    
+    this.matchCount = this.countMatches(this.filteredData);
+    this.cdr.markForCheck();
+  }
+  
+  private filterJson(obj: any, keyFilter: string, valueFilter: string): any {
+    if (obj === null || obj === undefined) return obj;
+    
+    if (typeof obj !== 'object') {
+      const valueStr = String(obj).toLowerCase();
+      return valueFilter && !valueStr.includes(valueFilter) ? undefined : obj;
+    }
+    
+    if (Array.isArray(obj)) {
+      const filtered = obj
+        .map(item => this.filterJson(item, keyFilter, valueFilter))
+        .filter(item => item !== undefined);
+      return filtered.length > 0 ? filtered : undefined;
+    }
+    
+    const filtered: any = {};
+    let hasMatches = false;
+    
+    for (const [key, value] of Object.entries(obj)) {
+      const keyMatch = !keyFilter || key.toLowerCase().includes(keyFilter);
+      const valueStr = typeof value === 'object' ? '' : String(value).toLowerCase();
+      const valueMatch = !valueFilter || valueStr.includes(valueFilter);
+      
+      if (keyMatch) {
+        if (valueFilter && typeof value !== 'object') {
+          if (valueMatch) {
+            filtered[key] = value;
+            hasMatches = true;
+          }
+        } else {
+          filtered[key] = value;
+          hasMatches = true;
+        }
+      } else {
+        const filteredValue = this.filterJson(value, keyFilter, valueFilter);
+        if (filteredValue !== undefined) {
+          filtered[key] = filteredValue;
+          hasMatches = true;
+        }
+      }
+    }
+    
+    return hasMatches ? filtered : undefined;
+  }
+  
+  private countMatches(obj: any, count = 0): number {
+    if (obj === null || obj === undefined) return count;
+    if (typeof obj !== 'object') return count + 1;
+    
+    if (Array.isArray(obj)) {
+      return obj.reduce((acc, item) => this.countMatches(item, acc), count);
+    }
+    
+    return Object.values(obj).reduce((acc, value) => this.countMatches(value, acc), count);
+  }
+}
+
+
+
+<!-- json-tree-view.component.html -->
+<div class="json-tree-container">
+  <div class="filter-section">
+    <div class="filter-row">
+      <div class="filter-input-container">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Filter by key..."
+          [(ngModel)]="keyFilter"
+          (ngModelChange)="onKeyFilterChange($event)"
+        />
+        <button
+          *ngIf="keyFilter"
+          class="clear-button"
+          (click)="keyFilter = ''; onKeyFilterChange('')"
+        >
+          <svg class="clear-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="filter-input-container">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="text"
+          class="filter-input"
+          placeholder="Filter by value..."
+          [(ngModel)]="valueFilter"
+          (ngModelChange)="onValueFilterChange($event)"
+        />
+        <button
+          *ngIf="valueFilter"
+          class="clear-button"
+          (click)="valueFilter = ''; onValueFilterChange('')"
+        >
+          <svg class="clear-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <button
+        *ngIf="keyFilter || valueFilter"
+        class="clear-all-button"
+        (click)="clearFilters()"
+      >
+        Clear All
+      </button>
+    </div>
+    
+    <div *ngIf="(keyFilter || valueFilter) && matchCount !== null" class="match-count">
+      {{ matchCount === 0 ? 'No matches found' : `Found ${matchCount} ${matchCount === 1 ? 'match' : 'matches'}` }}
+    </div>
+  </div>
+  
+  <div class="tree-content">
+    <div class="tree-container">
+      <ng-container *ngIf="(keyFilter || valueFilter) && matchCount === 0; else treeView">
+        <div class="no-matches">
+          <svg class="no-matches-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p>No matches found for your filters</p>
+          <p class="hint">Try adjusting your search criteria</p>
+        </div>
+      </ng-container>
+      
+      <ng-template #treeView>
+        <app-tree-node
+          [keyName]="'root'"
+          [value]="filteredData"
+          [level]="0"
+          [isRoot]="true"
+          [keyFilter]="keyFilter.toLowerCase()"
+          [valueFilter]="valueFilter.toLowerCase()"
+        ></app-tree-node>
+      </ng-template>
+    </div>
+  </div>
+</div>
