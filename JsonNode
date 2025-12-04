@@ -1,0 +1,523 @@
+// tree-node.component.ts
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-tree-node',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './tree-node.component.html',
+  styleUrls: ['./json-tree-view.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class TreeNodeComponent {
+  @Input() keyName: string = '';
+  @Input() value: any;
+  @Input() level: number = 0;
+  @Input() isRoot: boolean = false;
+  @Input() keyFilter: string = '';
+  @Input() valueFilter: string = '';
+  
+  isExpanded: boolean = false;
+  copied: boolean = false;
+  
+  ngOnInit(): void {
+    this.isExpanded = this.level < 2 || !!(this.keyFilter || this.valueFilter);
+  }
+  
+  get isObject(): boolean {
+    return this.value !== null && typeof this.value === 'object' && !Array.isArray(this.value);
+  }
+  
+  get isArray(): boolean {
+    return Array.isArray(this.value);
+  }
+  
+  get isExpandable(): boolean {
+    return this.isObject || this.isArray;
+  }
+  
+  toggleExpand(): void {
+    if (this.isExpandable) {
+      this.isExpanded = !this.isExpanded;
+    }
+  }
+  
+  handleCopy(): void {
+    navigator.clipboard.writeText(JSON.stringify(this.value, null, 2));
+    this.copied = true;
+    setTimeout(() => this.copied = false, 2000);
+  }
+  
+  getValueType(val: any): string {
+    if (val === null) return 'null';
+    if (Array.isArray(val)) return 'array';
+    return typeof val;
+  }
+  
+  getValueColor(val: any): string {
+    const type = this.getValueType(val);
+    switch (type) {
+      case 'string': return 'json-string';
+      case 'number': return 'json-number';
+      case 'boolean': return 'json-boolean';
+      case 'null': return 'json-null';
+      default: return '';
+    }
+  }
+  
+  highlightText(text: string, filter: string): string {
+    if (!filter) return text;
+    const regex = new RegExp(`(${this.escapeRegExp(filter)})`, 'gi');
+    return text.replace(regex, '<mark class="highlight">$1</mark>');
+  }
+  
+  private escapeRegExp(string: string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  
+  getObjectPreview(): string {
+    if (this.isArray) {
+      return `Array[${this.value.length}]`;
+    }
+    return `Object{${Object.keys(this.value).length}}`;
+  }
+  
+  getValueString(val: any): string {
+    if (val === null) return 'null';
+    if (typeof val === 'string') return `"${val}"`;
+    return String(val);
+  }
+}
+
+<!-- tree-node.component.html -->
+<div class="tree-node" [class.root-node]="isRoot">
+  <div 
+    class="node-content"
+    [class.hoverable]="!isRoot"
+    [style.paddingLeft.px]="level * 24 + (isRoot ? 0 : 16)"
+  >
+    <!-- Expand/Collapse Button -->
+    <button
+      *ngIf="isExpandable"
+      class="expand-button"
+      (click)="toggleExpand()"
+      [attr.aria-expanded]="isExpanded"
+    >
+      <svg *ngIf="isExpanded" class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+      <svg *ngIf="!isExpanded" class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+    
+    <div *ngIf="!isExpandable" class="expand-placeholder"></div>
+    
+    <!-- Key and Value -->
+    <div class="node-main">
+      <ng-container *ngIf="!isRoot">
+        <span class="json-key">
+          <span [innerHTML]="highlightText(keyName, keyFilter)"></span>:
+        </span>
+      </ng-container>
+      
+      <div class="json-value" [class]="getValueColor(value)">
+        <ng-container *ngIf="isExpandable; else primitiveValue">
+          <span class="object-preview">{{ getObjectPreview() }}</span>
+        </ng-container>
+        <ng-template #primitiveValue>
+          <span [innerHTML]="highlightText(getValueString(value), valueFilter)"></span>
+        </ng-template>
+      </div>
+    </div>
+    
+    <!-- Copy Button -->
+    <button
+      class="copy-button"
+      (click)="handleCopy()"
+      [attr.aria-label]="copied ? 'Copied' : 'Copy to clipboard'"
+    >
+      <svg *ngIf="copied" class="copy-icon success" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <svg *ngIf="!copied" class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Children -->
+  <div *ngIf="isExpandable && isExpanded" class="node-children">
+    <ng-container *ngIf="isArray; else objectChildren">
+      <app-tree-node
+        *ngFor="let item of value; let index = index"
+        [keyName]="'[' + index + ']'"
+        [value]="item"
+        [level]="level + 1"
+        [keyFilter]="keyFilter"
+        [valueFilter]="valueFilter"
+      ></app-tree-node>
+    </ng-container>
+    
+    <ng-template #objectChildren>
+      <app-tree-node
+        *ngFor="let item of value | keyvalue"
+        [keyName]="item.key"
+        [value]="item.value"
+        [level]="level + 1"
+        [keyFilter]="keyFilter"
+        [valueFilter]="valueFilter"
+      ></app-tree-node>
+    </ng-template>
+  </div>
+</div>
+
+/* json-tree-view.component.css */
+:host {
+  display: block;
+  height: 100%;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* CSS Variables */
+.json-tree-container {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --border: #e5e5e5;
+  --input: #fafafa;
+  --ring: #0a0a0a;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #f5f5f5;
+  --accent-foreground: #0a0a0a;
+  
+  /* JSON colors */
+  --json-string: #0ea5e9;
+  --json-number: #10b981;
+  --json-boolean: #f97316;
+  --json-null: #ef4444;
+  --json-key: #7c3aed;
+  
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (prefers-color-scheme: dark) {
+  .json-tree-container {
+    --background: #0a0a0a;
+    --foreground: #fafafa;
+    --card: #0a0a0a;
+    --card-foreground: #fafafa;
+    --border: #262626;
+    --input: #262626;
+    --ring: #d4d4d4;
+    --primary: #fafafa;
+    --primary-foreground: #0a0a0a;
+    --secondary: #262626;
+    --secondary-foreground: #fafafa;
+    --muted: #262626;
+    --muted-foreground: #a3a3a3;
+    --accent: #262626;
+    --accent-foreground: #fafafa;
+  }
+}
+
+.filter-section {
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filter-input-container {
+  flex: 1;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.filter-input {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 2.5rem;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--foreground);
+  transition: border-color 0.15s ease;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.clear-button {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: color 0.15s ease;
+}
+
+.clear-button:hover {
+  color: var(--foreground);
+}
+
+.clear-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.clear-all-button {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clear-all-button:hover {
+  background-color: var(--accent);
+  border-color: var(--border);
+}
+
+.match-count {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+.tree-content {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem;
+}
+
+.tree-container {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.no-matches {
+  padding: 2rem;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+.no-matches-icon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.75rem;
+  opacity: 0.5;
+}
+
+.no-matches .hint {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* TreeNode Styles */
+.tree-node {
+  border-left: 2px solid var(--border);
+  opacity: 0.5;
+  margin-left: 0.5rem;
+}
+
+.tree-node.root-node {
+  border-left: none;
+  margin-left: 0;
+  opacity: 1;
+}
+
+.node-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.node-content.hoverable:hover {
+  background-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.expand-button {
+  margin-top: 0.125rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.expand-button:hover {
+  color: var(--foreground);
+}
+
+.chevron-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.expand-placeholder {
+  width: 1rem;
+  flex-shrink: 0;
+}
+
+.node-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.json-key {
+  color: var(--json-key);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.json-value {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  min-width: 0;
+  word-break: break-all;
+}
+
+.json-value.json-string {
+  color: var(--json-string);
+}
+
+.json-value.json-number {
+  color: var(--json-number);
+}
+
+.json-value.json-boolean {
+  color: var(--json-boolean);
+}
+
+.json-value.json-null {
+  color: var(--json-null);
+}
+
+.object-preview {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+.copy-button {
+  opacity: 0;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  border-radius: 0.25rem;
+}
+
+.node-content:hover .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  color: var(--foreground);
+  background-color: var(--accent);
+}
+
+.copy-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.copy-icon.success {
+  color: var(--json-number);
+}
+
+.node-children {
+  border-left: 2px solid var(--border);
+  opacity: 0.5;
+  margin-left: 0.5rem;
+}
+
+.highlight {
+  background-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  border-radius: 0.125rem;
+  padding: 0.125rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+  }
+  
+  .filter-input-container {
+    width: 100%;
+  }
+  
+  .clear-all-button {
+    width: 100%;
+  }
+  
+  .node-content {
+    padding: 0.5rem;
+  }
+  
+  .node-main {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
