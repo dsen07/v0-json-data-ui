@@ -1,0 +1,113 @@
+<div class="incident-investigator">
+  <div class="header">
+    <div class="header-left">
+      <h1 class="title">{{ title }}</h1>
+    </div>
+    <div class="header-right">
+      <div class="view-toggle">
+        <button 
+          [class.active]="activeView === 'structured'"
+          (click)="setView('structured')"
+          class="toggle-button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Structured
+        </button>
+        <button 
+          [class.active]="activeView === 'json'"
+          (click)="setView('json')"
+          class="toggle-button">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"></path>
+            <path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path>
+          </svg>
+          JSON
+        </button>
+      </div>
+      <button class="copy-button" (click)="copyToClipboard()">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copy
+      </button>
+    </div>
+  </div>
+
+  <div class="filters" *ngIf="activeView === 'structured'">
+    <div class="filter-group">
+      <label class="filter-label">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        Filter by Key
+      </label>
+      <input 
+        type="text" 
+        [value]="keyFilter"
+        (input)="onKeyFilterChange($any($event.target).value)"
+        placeholder="Search keys..."
+        class="filter-input">
+      <button 
+        *ngIf="keyFilter"
+        (click)="onKeyFilterChange('')"
+        class="clear-button">
+        ×
+      </button>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        Filter by Value
+      </label>
+      <input 
+        type="text" 
+        [value]="valueFilter"
+        (input)="onValueFilterChange($any($event.target).value)"
+        placeholder="Search values..."
+        class="filter-input">
+      <button 
+        *ngIf="valueFilter"
+        (click)="onValueFilterChange('')"
+        class="clear-button">
+        ×
+      </button>
+    </div>
+
+    <div class="filter-actions">
+      <span class="match-count" *ngIf="keyFilter || valueFilter">
+        {{ matchCount }} match{{ matchCount !== 1 ? 'es' : '' }}
+      </span>
+      <button 
+        *ngIf="keyFilter || valueFilter"
+        (click)="clearFilters()"
+        class="clear-all-button">
+        Clear All
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <app-json-tree-view 
+      *ngIf="activeView === 'structured'"
+      [data]="data"
+      [keyFilter]="keyFilter"
+      [valueFilter]="valueFilter"
+      (matchCountChange)="onMatchCountChange($event)">
+    </app-json-tree-view>
+
+    <app-json-raw-view 
+      *ngIf="activeView === 'json'"
+      [data]="data">
+    </app-json-raw-view>
+  </div>
+</div>

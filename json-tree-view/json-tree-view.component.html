@@ -1,0 +1,64 @@
+<div class="tree-view">
+  <div class="tree-container">
+    <ng-container *ngFor="let node of tree">
+      <ng-container *ngTemplateOutlet="treeNode; context: { node: node, level: 0 }"></ng-container>
+    </ng-container>
+  </div>
+</div>
+
+<ng-template #treeNode let-node="node" let-level="level">
+  <div class="tree-node" *ngIf="node.isVisible" [style.padding-left.px]="level * 20">
+    <div class="node-content">
+      <button 
+        *ngIf="node.children && node.children.length > 0"
+        (click)="toggleNode(node)"
+        class="expand-button"
+        [class.expanded]="node.isExpanded">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+      <span *ngIf="!node.children || node.children.length === 0" class="expand-spacer"></span>
+
+      <span class="key" [class.highlight]="node.keyMatches">{{ node.key }}</span>
+      <span class="colon">:</span>
+
+      <span *ngIf="node.type === 'object'" class="bracket">&#123;</span>
+      <span *ngIf="node.type === 'array'" class="bracket">[</span>
+      
+      <span *ngIf="node.type === 'string'" class="value value-string" [class.highlight]="node.valueMatches">
+        {{ getValueString(node.value, node.type) }}
+      </span>
+      <span *ngIf="node.type === 'number'" class="value value-number" [class.highlight]="node.valueMatches">
+        {{ node.value }}
+      </span>
+      <span *ngIf="node.type === 'boolean'" class="value value-boolean" [class.highlight]="node.valueMatches">
+        {{ node.value }}
+      </span>
+      <span *ngIf="node.type === 'null'" class="value value-null" [class.highlight]="node.valueMatches">
+        null
+      </span>
+
+      <span *ngIf="node.type === 'object' && !node.isExpanded" class="preview">
+        {{ getObjectKeys(node.value) }} keys
+      </span>
+      <span *ngIf="node.type === 'array' && !node.isExpanded" class="preview">
+        {{ getArrayLength(node.value) }} items
+      </span>
+
+      <span *ngIf="node.type === 'object' && !node.isExpanded" class="bracket">&#125;</span>
+      <span *ngIf="node.type === 'array' && !node.isExpanded" class="bracket">]</span>
+    </div>
+
+    <ng-container *ngIf="node.isExpanded && node.children">
+      <ng-container *ngFor="let child of node.children">
+        <ng-container *ngTemplateOutlet="treeNode; context: { node: child, level: level + 1 }"></ng-container>
+      </ng-container>
+      <div class="closing-bracket" [style.padding-left.px]="level * 20">
+        <span class="expand-spacer"></span>
+        <span *ngIf="node.type === 'object'" class="bracket">&#125;</span>
+        <span *ngIf="node.type === 'array'" class="bracket">]</span>
+      </div>
+    </ng-container>
+  </div>
+</ng-template>

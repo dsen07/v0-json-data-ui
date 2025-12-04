@@ -1,0 +1,50 @@
+.json-raw-view {
+  background: #0a0a0a;
+  color: #e5e5e5;
+  height: 100%;
+  overflow: auto;
+}
+
+.json-content {
+  margin: 0;
+  padding: 20px;
+  font-family: "Fira Code", "Consolas", "Monaco", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+code {
+  font-family: inherit;
+}
+
+:host ::ng-deep .key {
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+:host ::ng-deep .string {
+  color: #34d399;
+}
+
+:host ::ng-deep .number {
+  color: #fb923c;
+}
+
+:host ::ng-deep .boolean {
+  color: #c084fc;
+}
+
+:host ::ng-deep .null {
+  color: #ef4444;
+  font-style: italic;
+}
+
+:host ::ng-deep .punctuation {
+  color: #737373;
+}
+
+:host ::ng-deep .error {
+  color: #ef4444;
+}
