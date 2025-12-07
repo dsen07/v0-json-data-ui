@@ -1,3 +1,51 @@
+:root {
+    --background: oklch(.99 0 0);
+    --foreground: oklch(.15 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(.15 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(.15 0 0);
+    --primary: oklch(.32 .06 265);
+    --primary-foreground: oklch(.98 0 0);
+    --secondary: oklch(.96 .005 265);
+    --secondary-foreground: oklch(.15 0 0);
+    --muted: oklch(.97 .002 265);
+    --muted-foreground: oklch(.52 .015 265);
+    --accent: oklch(.95 .01 220);
+    --accent-foreground: oklch(.15 0 0);
+    --destructive: oklch(.58 .22 25);
+    --destructive-foreground: oklch(.98 0 0);
+    --border: oklch(.91 .005 265);
+    --input: oklch(.91 .005 265);
+    --ring: oklch(.52 .08 265);
+    --chart-1: oklch(.48 .18 265);
+    --chart-2: oklch(.55 .15 180);
+    --chart-3: oklch(.5 .15 60);
+    --chart-4: oklch(.65 .12 140);
+    --chart-5: oklch(.45 .18 320);
+    --radius: .5rem;
+    --sidebar: oklch(.985 0 0);
+    --sidebar-foreground: oklch(.145 0 0);
+    --sidebar-primary: oklch(.205 0 0);
+    --sidebar-primary-foreground: oklch(.985 0 0);
+    --sidebar-accent: oklch(.97 0 0);
+    --sidebar-accent-foreground: oklch(.205 0 0);
+    --sidebar-border: oklch(.922 0 0);
+    --sidebar-ring: oklch(.708 0 0);
+}
+
+.key {
+    color: var(--muted-foreground);
+}
+
+.value-text {
+    color: var(--chart-2);
+}
+
+.value-number {
+    color: var(--chart-3);
+}
+
 /* Global Styles */
 * {
   margin: 0;
@@ -6,7 +54,8 @@
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /*font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;*/
+  font-family: "Geist Mono", "Geist Mono Fallback";
   background: #000000;
   color: #e5e5e5;
   -webkit-font-smoothing: antialiased;
