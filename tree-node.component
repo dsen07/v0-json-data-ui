@@ -1,0 +1,606 @@
+//Global CSS:
+/* Global Resets and Variables */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-primary-light: #dbeafe;
+  --color-destructive: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+
+  /* Neutrals */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-400: #9ca3af;
+  --color-gray-600: #6b7280;
+  --color-gray-900: #111827;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Highlight */
+  --color-highlight: #fef08a;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  /* Font Family */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+:root {
+  /* Colors */
+  --color-primary: #3b82f6;
+  --color-primary-light: #dbeafe;
+  --color-destructive: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+
+  /* Neutrals */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-400: #9ca3af;
+  --color-gray-600: #6b7280;
+  --color-gray-900: #111827;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Highlight */
+  --color-highlight: #fef08a;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  /* Font Family */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Courier New', Courier, monospace;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-gray-900);
+  background-color: var(--color-gray-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+
+
+//tree-node.component.css
+/* Tree Node Container */
+.tree-node {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+  margin: 2px 0;
+  position: relative;
+}
+
+.tree-node:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.tree-node.current-match {
+  background-color: var(--color-primary-light);
+  box-shadow: 0 0 0 2px var(--color-primary);
+  animation: highlight-pulse 0.5s ease-out;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 2px var(--color-primary), 0 0 0 6px rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
+}
+
+/* Expand Button */
+.expand-btn {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-gray-600);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-normal), transform var(--transition-normal);
+  border-radius: var(--radius-sm);
+}
+
+.expand-btn:hover {
+  color: var(--color-gray-900);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.expand-btn:active {
+  transform: scale(0.95);
+}
+
+.chevron-icon {
+  height: 16px;
+  width: 16px;
+  transition: transform var(--transition-normal);
+}
+
+/* Spacer for non-expandable nodes */
+.spacer {
+  width: 16px;
+  flex-shrink: 0;
+}
+
+/* Node Content */
+.node-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.node-key-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.node-key {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  line-height: 1.5;
+}
+
+.node-key.key-matched {
+  color: var(--color-gray-900);
+  background-color: var(--color-highlight);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Match Badge */
+.match-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Node Value */
+.node-value {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  word-break: break-word;
+  line-height: 1.6;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Value Types */
+.value-null {
+  color: var(--color-gray-600);
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.value-boolean {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.value-number {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.value-string {
+  color: var(--color-success);
+}
+
+/* Collapsed Text */
+.collapsed-text {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  font-style: italic;
+  background-color: var(--color-gray-100);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+}
+
+/* Highlight */
+.highlight {
+  background-color: var(--color-highlight);
+  color: var(--color-gray-900);
+  border-radius: 2px;
+  padding: 1px 3px;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Children Container */
+.tree-node-children {
+  margin-left: 12px;
+  border-left: 1px solid var(--color-gray-200);
+  padding-left: 12px;
+}
+
+/* Loading State (if needed) */
+.tree-node-loading {
+  color: var(--color-gray-400);
+  font-size: 0.875rem;
+  font-style: italic;
+  padding: var(--spacing-sm);
+}
+
+/* Hover effects for interactive elements */
+.node-key:hover {
+  cursor: default;
+}
+
+/* Focus states for accessibility */
+.tree-node:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.expand-btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+//tree-node.component.ts
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ElementRef,
+  OnChanges,
+  AfterViewChecked,
+  SimpleChanges, AfterViewInit, ViewChild
+} from '@angular/core';
+
+@Component({
+  selector: 'app-tree-node',
+  standalone: false,
+  templateUrl: './tree-node.component.html',
+  styleUrls: ['./tree-node.component.css']
+})
+export class TreeNodeComponent implements OnChanges, AfterViewInit {
+  @Input() keyName: string = '';
+  @Input() value: any;
+  @Input() level: number = 0;
+  @Input() path: string = '';
+  @Input() searchTerm: string = '';
+  @Input() currentResultIndex: number = -1;
+  @Input() matchedPaths: Set<string> = new Set();
+  @Input() matchOrder: string[] = [];
+  @Input() parentPaths: Set<string> = new Set(); // <CHANGE> Accept parent paths from parent component
+
+  @ViewChild('nodeElement') nodeElement?: ElementRef;
+
+  isExpanded: boolean = true;
+  isObject: boolean = false;
+  isArray: boolean = false;
+  isExpandable: boolean = false;
+  keyMatches: boolean = false;
+  valueMatches: boolean = false;
+  isMatch: boolean = false;
+  matchIndex: number = -1;
+  isCurrentMatch: boolean = false;
+  filteredChildren: any[] = [];
+  paddingLeft: string = '12px';
+
+  ngOnInit(): void {
+    this.isExpanded = true;
+    this.updateNodeState();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['value'] || changes['searchTerm'] || changes['currentResultIndex'] || changes['matchedPaths']) {
+      this.updateNodeState();
+    }
+
+    if (changes['currentResultIndex'] && this.isCurrentMatch) {
+      this.scrollToNode();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    if (this.isCurrentMatch) {
+      setTimeout(() => this.scrollToNode(), 100);
+    }
+  }
+
+  private updateNodeState(): void {
+    this.isObject = this.value !== null && typeof this.value === 'object' && !Array.isArray(this.value);
+    this.isArray = Array.isArray(this.value);
+    this.isExpandable = this.isObject || this.isArray;
+
+    const searchLower = this.searchTerm.toLowerCase();
+
+    // <CHANGE> More comprehensive matching logic
+    this.keyMatches = this.searchTerm && (
+      this.keyName.toLowerCase().includes(searchLower) ||
+      String(this.keyName).includes(this.searchTerm) // Exact number match
+    ) || false;
+
+    this.valueMatches = this.searchTerm &&
+      !this.isExpandable &&
+      this.value !== null &&
+      this.value !== undefined &&
+      (String(this.value).toLowerCase().includes(searchLower) ||
+        String(this.value).includes(this.searchTerm)) || false; // Exact number match
+
+    this.isMatch = this.matchedPaths.has(this.path);
+    this.matchIndex = this.matchOrder.indexOf(this.path);
+    this.isCurrentMatch = this.isMatch && this.matchIndex === this.currentResultIndex;
+
+    // <CHANGE> Always expand when searching and node should be visible
+    if (this.searchTerm && this.shouldShowNode(this.path)) {
+      this.isExpanded = true;
+    }
+
+    if (this.isExpandable && this.isExpanded) {
+      this.filteredChildren = this.getFilteredChildren();
+    }
+
+    this.paddingLeft = `${this.level * 24 + 12}px`;
+  }
+
+  private scrollToNode(): void {
+    if (!this.nodeElement) return;
+
+    const element = this.nodeElement.nativeElement;
+    const scrollContainer = element.closest('.structured-view-container');
+
+    if (scrollContainer) {
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const nodeRect = element.getBoundingClientRect();
+
+      const currentScrollTop = scrollContainer.scrollTop;
+      const nodeRelativeTop = nodeRect.top - containerRect.top;
+      const targetScrollTop = currentScrollTop + nodeRelativeTop - 20;
+
+      scrollContainer.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth'
+      });
+    } else {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
+  }
+
+  private getFilteredChildren(): any[] {
+    const children: any[] = [];
+
+    if (this.isArray) {
+      this.value.forEach((item: any, index: number) => {
+        const childPath = `${this.path}.${index}`;
+        const childKey = `[${index}]`;
+
+        // <CHANGE> Use updated shouldShowNode logic
+        if (this.shouldShowNode(childPath)) {
+          children.push({ key: childKey, value: item, path: childPath });
+        }
+      });
+    } else {
+      Object.entries(this.value).forEach(([key, val]) => {
+        const childPath = `${this.path}.${key}`;
+
+        // <CHANGE> Use updated shouldShowNode logic
+        if (this.shouldShowNode(childPath)) {
+          children.push({ key, value: val, path: childPath });
+        }
+      });
+    }
+
+    return children;
+  }
+
+  // <CHANGE> Enhanced shouldShowNode with parent path checking
+  shouldShowNode(path: string): boolean {
+    // Always show when not searching
+    if (!this.searchTerm) return true;
+
+    // Show if this path is a direct match
+    if (this.matchedPaths.has(path)) return true;
+
+    // Show if this path is in parent paths (ancestor of a match)
+    if (this.parentPaths && this.parentPaths.has(path)) return true;
+
+    // Show if any matched path starts with this path (has matching descendants)
+    for (const matchedPath of this.matchedPaths) {
+      if (matchedPath.startsWith(path + '.')) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  toggleExpand(): void {
+    this.isExpanded = !this.isExpanded;
+    if (this.isExpandable && this.isExpanded) {
+      this.filteredChildren = this.getFilteredChildren();
+    }
+  }
+
+  renderValue(val: any): { text: string; class: string } {
+    if (val === null) return { text: 'null', class: 'value-null' };
+    if (typeof val === 'boolean') return { text: String(val), class: 'value-boolean' };
+    if (typeof val === 'number') return { text: String(val), class: 'value-number' };
+    if (typeof val === 'string') return { text: `"${val}"`, class: 'value-string' };
+    return { text: '', class: '' };
+  }
+
+  highlightText(text: string, shouldHighlight: boolean): string {
+    if (!shouldHighlight || !this.searchTerm) return text;
+
+    const regex = new RegExp(`(${this.escapeRegex(this.searchTerm)})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map(part =>
+      part.toLowerCase() === this.searchTerm.toLowerCase()
+        ? `<mark class="highlight">${part}</mark>`
+        : part
+    ).join('');
+  }
+
+  // <CHANGE> Helper function to escape regex special characters
+  private escapeRegex(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  getCollapsedText(): string {
+    if (!this.isExpandable) return '';
+
+    if (this.searchTerm) {
+      return `Filtered(${this.filteredChildren.length})`;
+    }
+    return this.isArray
+      ? `Array(${this.value.length})`
+      : `Object(${Object.keys(this.value).length})`;
+  }
+
+  protected readonly String = String;
+}
+
+//tree-node.component.html
+<div #nodeElement *ngIf="shouldShowNode(path)">
+  <div
+    class="tree-node"
+    [class.current-match]="isCurrentMatch"
+    [style.padding-left]="paddingLeft">
+
+    <!-- Expand/Collapse Button -->
+    <button
+      *ngIf="isExpandable"
+      class="expand-btn"
+      (click)="toggleExpand()">
+      <svg *ngIf="isExpanded" class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+      <svg *ngIf="!isExpanded" class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+    <div *ngIf="!isExpandable" class="spacer"></div>
+
+    <!-- Content -->
+    <div class="node-content">
+      <div class="node-key-section">
+        <span
+          class="node-key"
+          [class.key-matched]="keyMatches"
+          [innerHTML]="highlightText(keyName, keyMatches)">
+        </span>:
+        <span *ngIf="isMatch" class="match-badge">Match</span>
+      </div>
+
+      <!-- Value for non-expandable nodes -->
+      <div *ngIf="!isExpandable" class="node-value">
+        <span
+          *ngIf="valueMatches"
+          [innerHTML]="highlightText(String(value), true)">
+        </span>
+        <span
+          *ngIf="!valueMatches"
+          [class]="renderValue(value).class">
+          {{ renderValue(value).text }}
+        </span>
+      </div>
+
+      <!-- Collapsed text for expandable nodes -->
+      <span *ngIf="isExpandable && !isExpanded" class="collapsed-text">
+        {{ getCollapsedText() }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Children -->
+  <div *ngIf="isExpandable && isExpanded">
+    <app-tree-node
+      *ngFor="let child of filteredChildren"
+      [keyName]="child.key"
+      [value]="child.value"
+      [level]="level + 1"
+      [path]="child.path"
+      [searchTerm]="searchTerm"
+      [currentResultIndex]="currentResultIndex"
+      [matchedPaths]="matchedPaths"
+      [matchOrder]="matchOrder"
+      [parentPaths]="parentPaths">
+    </app-tree-node>
+  </div>
+</div>
+
