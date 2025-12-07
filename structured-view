@@ -1,0 +1,258 @@
+//css
+.structured-view-container {
+  height: 100%;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+}
+
+.empty-state-content {
+  text-align: center;
+}
+
+.empty-state-text {
+  font-size: 0.875rem;
+}
+
+.empty-state-hint {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.structured-view-container {
+  height: 100%;
+  overflow: auto;
+  padding: var(--spacing-lg);
+  background-color: var(--color-white);
+}
+
+/* Custom Scrollbar */
+.structured-view-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.structured-view-container::-webkit-scrollbar-track {
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-lg);
+}
+
+.structured-view-container::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-400);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-gray-100);
+}
+
+.structured-view-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-gray-600);
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  color: var(--color-gray-600);
+  padding: var(--spacing-2xl);
+}
+
+.empty-state-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.empty-state-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-hint {
+  font-size: 0.75rem;
+  color: var(--color-gray-600);
+}
+
+
+//structured-view.component.ts
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+
+export interface TreeNodeData {
+  key: string;
+  value: any;
+  path: string;
+}
+
+@Component({
+  selector: 'app-structured-view',
+  standalone: false,
+  templateUrl: './structured-view.component.html',
+  styleUrls: ['./structured-view.component.css']
+})
+export class StructuredViewComponent implements OnChanges {
+  @Input() data: any;
+  @Input() searchTerm: string = '';
+  @Input() currentResultIndex: number = -1;
+  @Output() searchResultsChange = new EventEmitter<string[]>();
+
+  matchOrder: string[] = [];
+  matchedPaths: Set<string> = new Set();
+  parentPaths: Set<string> = new Set(); // <CHANGE> Track parent paths that need to be visible
+  rootEntries: TreeNodeData[] = [];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data'] || changes['searchTerm']) {
+      this.updateMatches();
+    }
+  }
+
+  private updateMatches(): void {
+    // <CHANGE> Collect all matching paths and compute parent paths
+    this.matchOrder = this.collectMatchingPathsInOrder(this.data, this.searchTerm);
+    this.matchedPaths = new Set(this.matchOrder);
+    this.parentPaths = this.computeParentPaths(this.matchedPaths);
+    this.searchResultsChange.emit(this.matchOrder);
+    this.rootEntries = this.getRootEntries();
+  }
+
+  // <CHANGE> Compute all parent paths that need to be visible
+  private computeParentPaths(matchedPaths: Set<string>): Set<string> {
+    const parents = new Set<string>();
+
+    for (const path of matchedPaths) {
+      const parts = path.split('.');
+      // Add all parent paths
+      for (let i = 1; i < parts.length; i++) {
+        const parentPath = parts.slice(0, i).join('.');
+        parents.add(parentPath);
+      }
+    }
+
+    return parents;
+  }
+
+  private collectMatchingPathsInOrder(data: any, searchTerm: string): string[] {
+    const matchedPaths: string[] = [];
+    if (!searchTerm) return matchedPaths;
+
+    const searchLower = searchTerm.toLowerCase();
+
+    const traverse = (obj: any, currentPath: string) => {
+      if (obj === null || typeof obj !== 'object') {
+        return;
+      }
+
+      if (Array.isArray(obj)) {
+        obj.forEach((item, index) => {
+          const itemPath = currentPath ? `${currentPath}.${index}` : `${index}`;
+          // <CHANGE> Check both the key representation and the value
+          const keyMatches = String(index).toLowerCase().includes(searchLower) ||
+            `[${index}]`.toLowerCase().includes(searchLower);
+          const isExpandable = item !== null && typeof item === 'object';
+          const valueMatches = !isExpandable &&
+            item !== null &&
+            item !== undefined &&
+            String(item).toLowerCase().includes(searchLower);
+
+          if (keyMatches || valueMatches) {
+            matchedPaths.push(itemPath);
+          }
+
+          traverse(item, itemPath);
+        });
+      } else {
+        Object.entries(obj).forEach(([key, value]) => {
+          const valuePath = currentPath ? `${currentPath}.${key}` : key;
+          // <CHANGE> More comprehensive key matching
+          const keyMatches = key.toLowerCase().includes(searchLower);
+          const isExpandable = value !== null && typeof value === 'object';
+          const valueMatches = !isExpandable &&
+            value !== null &&
+            value !== undefined &&
+            String(value).toLowerCase().includes(searchLower);
+
+          if (keyMatches || valueMatches) {
+            matchedPaths.push(valuePath);
+          }
+
+          traverse(value, valuePath);
+        });
+      }
+    };
+
+    traverse(data, '');
+    return matchedPaths;
+  }
+
+  private getRootEntries(): TreeNodeData[] {
+    if (!this.searchTerm) {
+      return Object.entries(this.data).map(([key, value]) => ({
+        key,
+        value,
+        path: key
+      }));
+    }
+
+    // <CHANGE> Filter root entries based on matches or parent paths
+    return Object.entries(this.data)
+      .filter(([key]) => this.shouldShowNode(key, this.matchedPaths, this.parentPaths, this.searchTerm))
+      .map(([key, value]) => ({
+        key,
+        value,
+        path: key
+      }));
+  }
+
+  // <CHANGE> Updated shouldShowNode to check parent paths
+  shouldShowNode(path: string, matchedPaths: Set<string>, parentPaths: Set<string>, searchTerm: string): boolean {
+    if (!searchTerm) return true;
+
+    // Show if this path is a direct match
+    if (matchedPaths.has(path)) return true;
+
+    // Show if this path is a parent of a match
+    if (parentPaths.has(path)) return true;
+
+    // Show if any matched path starts with this path (has matching descendants)
+    for (const matchedPath of matchedPaths) {
+      if (matchedPath.startsWith(path + '.')) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+//structured-view.component.html
+<div class="structured-view-container">
+  <app-tree-node
+    *ngFor="let entry of rootEntries"
+    [keyName]="entry.key"
+    [value]="entry.value"
+    [level]="0"
+    [path]="entry.path"
+    [searchTerm]="searchTerm"
+    [currentResultIndex]="currentResultIndex"
+    [matchedPaths]="matchedPaths"
+    [matchOrder]="matchOrder"
+    [parentPaths]="parentPaths">
+  </app-tree-node>
+
+  <div class="empty-state" *ngIf="searchTerm && rootEntries.length === 0">
+    <div class="empty-state-content">
+      <p class="empty-state-text">No matches found for "{{ searchTerm }}"</p>
+      <p class="empty-state-hint">Try a different search term</p>
+    </div>
+  </div>
+</div>
+
